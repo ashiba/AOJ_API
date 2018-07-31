@@ -1,27 +1,33 @@
 from collections import defaultdict
-import xml.etree.ElementTree as ET
-import urllib.request
+import requests
+#import xml.etree.ElementTree as ET
+#import urllib.request
+import json
 
+volumes = [0,1,2,3,5,6,10,15,30,11,12,13,16,20,21,22,23,24,25,26,27,28]
+
+findByUserIdSolutions_API_URL = ['https://judgeapi.u-aizu.ac.jp/solutions/users/','?page=0&size=5000']
+findByVolume_API_URL = 'https://judgeapi.u-aizu.ac.jp/problems/volumes/'
+findById_API_URL = 'https://judgeapi.u-aizu.ac.jp/users/'
 class User:
 	def __init__(self, user_id):
 		self.user_id = user_id
-		self.root = self.get_user_root()
+		self.user_json_data		= json.loads( get_str_from_URL( findById_API_URL + self.user_id ) )
+		self.solved_json_data	= json.loads( get_str_from_URL( findByUserIdSolutions_API_URL[0] + self.user_id + findByUserIdSolutions_API_URL[1] ) )
+		self.user_affiliation 	= self.user_json_data['affiliation']
+		self.registerdate		= self.user_json_data['registerDate']
 
 		self.solved_id_set = set()
-		_self.solved_id_set_flag = False
-
-
-	def _get_user_root(self):
-		http_resp = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/user?id='+self.user_id)
-		tree = ET.parse( http_resp )
-		root = tree.getroot()
-		return root
-
+		self.solved_id_set_flag = False
 
 	def get_solved_idSet(self):
-		for problemID in self.root.findall(".//problem/id"):
-			self.solved_id_set.add( int(problemID.text) );
+		for data in self.solved_json_data:
+			self.solved_id_set.add( data['problemId'] )
 
+
+def get_str_from_URL(url):
+	resp = requests.get( url )
+	return (resp.content).decode('utf-8')
 
 
 def get_under_meList(rankList):
@@ -37,10 +43,10 @@ def get_under_meList(rankList):
 	return retList
 
 
-def get_prob_name(prob_id):
-	http_resp = urllib.request.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/problem?id='+prob_id)
-	root=getRoot( http_resp )
-	#
-	return root.find(".//name").text
-
-
+def get_problemID_set():
+	ret = set()
+	for volume in volumes:
+		json_data = json.loads( get_str_from_URL( findByVolume_API_URL + str(volume) ) )
+		for data in json_data['problems']:
+			ret.add( data['id'] )
+	return ret

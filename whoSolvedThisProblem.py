@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# 問題IDを標準入力から入力すると、userListに含まれるユーザのうちその問題を解いたユーザ名が出力される
+
 from collections import defaultdict
 import xml.etree.ElementTree as ET
 import urllib2
@@ -59,5 +61,3 @@ while True:
 			if(num.text==problemNum):
 				print name
 				break
-
-

@@ -1,48 +1,19 @@
 # -*- coding: utf-8 -*-
 
-from collections import defaultdict
-import xml.etree.ElementTree as ET
-import urllib2
+import AOJ
 
 ME="Yazaten"
 
-def getUser(id):
-    response = urllib2.urlopen('http://judge.u-aizu.ac.jp/onlinejudge/webservice/user?id='+id)
-    return response
+me = AOJ.User(ME)
+me.getSolvedIdSet()
 
+prob_set = set()
+f = open('prob.txt','r')
+for line in f:
+	prob_set.add( int(line[:-1]) )
 
-def makeUserData():
-	html=getUser(ME);
-	#
-	tree=ET.parse(html)
-	root=tree.getroot()
-	#
-	#
-	return root
-
-userData = makeUserData()
-
-
-probDict = defaultdict(lambda:False)
-c = 0
-probList=[]
-for prob in open('prob.txt','r'):
-	prob = prob[:-1]
-	probDict[prob] = False
-	probList.append(prob)
-	c+=1
-for num in userData.findall(".//problem//id"):
-	if c==0: break
-	for prob in probDict:
-		if num.text==prob:
-			probDict[prob]=True
-			c-=1
-
-for prob in probList:
-	str=""
-	if probDict[prob]==True:
-		str="Solved"
+for prob in prob_set:
+	if prob in me.solved_id_set:
+		print( ' %04d : Solved.' % prob )
 	else:
-		str="Un solved"
-	print prob+" : "+str
-
+		print( ' %04d : Un Solved.' % prob )
